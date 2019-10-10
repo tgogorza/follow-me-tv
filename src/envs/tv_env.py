@@ -58,9 +58,9 @@ class TVEnv(gym.Env):
         self.rotation_step = config.rotation_step
 
         self.num_slots = config.num_slots
-        self.image_width = config.image_width
-        self.center_slot = 4 #int(self.num_slots / 2)
-        self.slot_width = self.image_width / self.num_slots
+        # self.image_width = config.image_width
+        self.center_slot = int(self.num_slots / 2)
+        # self.slot_width = self.image_width / self.num_slots
 
         # self.angle = self.rotator.getAngle()
         self.episode_length = 50
@@ -68,7 +68,7 @@ class TVEnv(gym.Env):
         self.camera = FakeCamera(self.num_slots)
 
         self.action_space = spaces.Discrete(3)
-        self.observation_space = spaces.Discrete(self.num_slots)  #OneHot(size=self.num_slots)
+        self.observation_space = spaces.Discrete(self.num_slots)
 
         self.seed()
         self.viewer = None
@@ -82,15 +82,8 @@ class TVEnv(gym.Env):
 
     def step(self, action):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-        # centroid_slot = self.state
 
         self.execute_action(action)
-        # Give time to rotate camera
-        # time.sleep(0.5)
-        # faces = face_detector.get_faces()
-        # new_centroid = self.get_centroid(faces)
-        # new_centroid_slot = self.get_slot(new_centroid)
-
         _, new_centroid_slot = self.camera.get_centroid()
 
         if new_centroid_slot == self.center_slot:
@@ -100,16 +93,12 @@ class TVEnv(gym.Env):
 
         reward = self.get_reward(new_centroid_slot) 
         done = self.steps >= self.episode_length
-        # if done:
-        #     self.reset()
-        # else:
+
         if not done:
             self.steps += 1
             
         self.state = new_centroid_slot
-
         return new_centroid_slot, reward, done, {}
-        # return self.state, reward, done, {}
 
 
     def reset(self):

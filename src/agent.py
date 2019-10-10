@@ -1,3 +1,5 @@
+import numpy as np
+import tensorflow as tf
 from keras.models import Sequential, Model
 from keras.layers import Dense, Activation, Flatten, Input
 from keras.optimizers import Adam
@@ -18,8 +20,8 @@ class FollowAgent:
         self.env_name = 'follow-me-tv-v0'
         # Get the environment and extract the number of actions.
         self.env = env
-        self.num_steps = 100000
-
+        self.num_steps = 100000 
+        self.graph = None
         self.memory = SequentialMemory(limit=10000, window_length=1)
         self.policy = LinearAnnealedPolicy(EpsGreedyQPolicy(), attr='eps', value_max=1., value_min=.3, value_test=.05, nb_steps=self.num_steps)
         self.model = self.build_model(state_size, num_actions)
@@ -61,3 +63,17 @@ class FollowAgent:
     def test(self):
         # self.agent.compile(Adam(lr=1e-3), metrics=['mae'])
         self.agent.test(self.env, nb_episodes=25, visualize=True)
+
+    def start_service(self, saved_model):
+        self.model.load_weights(saved_model)
+        self.graph = tf.get_default_graph()
+        print("Loaded model from disk")
+
+    def get_action(self, slot):
+        # self.model.load_weights("/home/tomas/Projects/follow-me-tv/src/dqn_follow-me-tv-v0_weights_100000.h5f")
+        # self.model.compile(Adam(lr=1e-3), metrics=['mae'])
+        with self.graph.as_default():
+            action = np.argmax(self.model.predict([slot]))
+        return action
+        
+        
