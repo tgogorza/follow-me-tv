@@ -20,12 +20,15 @@ class Rotator:
 
 	def setAngle(self, angle):
 		duty = angle / 18 + 2
-		GPIO.output(self.pin, True)
-		self.angle = angle
-		self.pwm.ChangeDutyCycle(duty)
-		sleep(0.5)
-		GPIO.output(self.pin, False)
-		self.pwm.ChangeDutyCycle(0)
+		if 0.0 <= duty <= 100.0: 
+			GPIO.output(self.pin, True)
+			self.angle = angle
+			self.pwm.ChangeDutyCycle(duty)
+			# sleep(0.5)
+			GPIO.output(self.pin, False)
+			self.pwm.ChangeDutyCycle(0)
+		else:
+			print("EXCEEDED DUTY CYCLE: {}. Must be between 0.0 and 100.0")
 
 	def getAngle(self):
 		return self.angle

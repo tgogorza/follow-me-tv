@@ -55,9 +55,9 @@ def get_action():
                 "slot": str(slot),
                 }
 
-    print('{} - {} ({})'.format(slot, action_str, action))
+    print('{} - {} ({})'.format(response['slot'], response['action_str'], response['action']))
     return jsonify(response)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    app.run('0.0.0.0', debug=True, use_reloader=False)
