@@ -16,6 +16,8 @@ import envs.spaces as spaces
 
 class FollowAgent:
 
+    action_str = ["no action", "move_left", "move_right"]
+
     def __init__(self, env, state_size=1, num_actions=3):
         self.env_name = 'follow-me-tv-v0'
         # Get the environment and extract the number of actions.

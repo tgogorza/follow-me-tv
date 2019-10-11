@@ -49,6 +49,7 @@ def get_action():
 
     
     response = {"action": str(action),
+                "action_str": agent.action_str[action],
                 "faces": faces,
                 "centroid": str(centroid),
                 "slot": str(slot),

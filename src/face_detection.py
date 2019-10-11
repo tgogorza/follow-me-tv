@@ -1,49 +1,71 @@
 from imutils.video import VideoStream
 from imutils.video import FPS
 # import face_recognition
-# import argparse
+import argparse
 import imutils
-# import pickle
+import pickle
 import time
 import cv2
+import os
+from time import sleep
+
+VIDEO_STREAM = 'http://192.168.0.30:8000/stream.mjpg'
+FLIP_VIDEO = False
+PROCESS_HEIGHT = 480
+PROCESS_WIDTH = 640
+INPUT_HEIGHT = 960
+INPUT_WIDTH = 1280
+
+curr_path = os.path.dirname(os.path.realpath(__file__))
 
 # load the known faces and embeddings along with OpenCV's Haar
 # cascade for face detection
 print("[INFO] loading encodings + face detector...")
-# data = pickle.loads(open(args["encodings"], "rb").read())
-detector = cv2.CascadeClassifier(args["cascade"])
+detector = cv2.CascadeClassifier(os.path.join(curr_path, '../data/haarcascade_frontalface_alt.xml'))
  
 # initialize the video stream and allow the camera sensor to warm up
 print("[INFO] starting video stream...")
 # vs = VideoStream(src=0).start()
-vs = VideoStream(usePiCamera=True).start()
-time.sleep(2.0)
- 
-# start the FPS counter
-fps = FPS().start()
+# vs = VideoStream(usePiCamera=True).start()
+vs = cv2.VideoCapture(VIDEO_STREAM)
 
-# loop over frames from the video file stream
+def convert_coords(box):
+	x1 = int(INPUT_WIDTH * box[3] / PROCESS_WIDTH)
+	y1 = int(INPUT_HEIGHT * box[0] / PROCESS_HEIGHT)
+	x2 = int(INPUT_WIDTH * box[1] / PROCESS_WIDTH)
+	y2 = int(INPUT_HEIGHT * box[2] / PROCESS_HEIGHT)
+	return (x1, y1, x2, y2)
+
+# loop over stream
 while True:
-	# grab the frame from the threaded video stream and resize it
-	# to 500px (to speedup processing)
-	frame = vs.read()
-	frame = imutils.resize(frame, width=500)
-	
-	# convert the input frame from (1) BGR to grayscale (for face
-	# detection) and (2) from BGR to RGB (for face recognition)
+	ret, frame = vs.read()
+	if FLIP_VIDEO:
+		frame = cv2.flip(frame, 0)
+
+	# convert to grayscale and resize for face detections
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	# rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+	gray = imutils.resize(gray, width=PROCESS_WIDTH)
  
 	# detect faces in the grayscale frame
 	rects = detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
- 
-	# OpenCV returns bounding box coordinates in (x, y, w, h) order
-	# but we need them in (top, right, bottom, left) order, so we
-	# need to do a bit of reordering
+	#rects=[]
+	# Get boxes coordinates
 	boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
- 
+	# Translate boxes coords to original frame size
+	boxes = [convert_coords(box) for box in boxes]
+	# Draw bounding boxes
+	[cv2.rectangle(frame,(box[0], box[1]),(box[2], box[3]),(0,255,0),2) for box in boxes]
+	
 	# compute the facial embeddings for each face bounding box
 	# encodings = face_recognition.face_encodings(rgb, boxes)
-	# names = []
+	
+	# Show frame
+	cv2.imshow('Stream IP Camera OpenCV',frame)
+	if cv2.waitKey(1) & 0xFF == ord('q'):
+		break
+	#sleep(1)
 
-    print boxes
+vs.release()
+cv2.destroyAllWindows()
+

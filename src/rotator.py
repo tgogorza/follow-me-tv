@@ -12,25 +12,28 @@ class Rotator:
 		self.pwm=GPIO.PWM(pin, freq)
 		self.pwm.start(0)
 		self.pin = pin
-		self.ang = 90
-		SetAngle(ang, pwm)
+		self.setAngle(90)
 
 	def __del__(self):
 		self.pwm.stop()
 		GPIO.cleanup()
 
-	def SetAngle(angle):
+	def setAngle(angle):
 		duty = angle / 18 + 2
 		GPIO.output(self.pin, True)
+		self.angle = angle
 		self.pwm.ChangeDutyCycle(duty)
 		sleep(0.5)
 		GPIO.output(self.pin, False)
 		self.pwm.ChangeDutyCycle(0)
 
+	def getAngle():
+		return self.angle
+
 # if __name__ == "__main__":
 # 	pwm=GPIO.PWM(8, 50)
 # 	pwm.start(0)
 # 	ang = int(sys.argv[1])
-# 	SetAngle(ang, pwm)
+# 	setAngle(ang, pwm)
 # 	pwm.stop()
 # 	GPIO.cleanup()
