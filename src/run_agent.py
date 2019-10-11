@@ -55,6 +55,7 @@ def get_action():
                 "slot": str(slot),
                 }
 
+    print('{} - {} ({})'.format(slot, action_str, action))
     return jsonify(response)
 
 
