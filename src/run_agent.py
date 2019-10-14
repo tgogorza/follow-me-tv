@@ -37,7 +37,7 @@ agent.start_service("/home/tomas/Projects/follow-me-tv/src/dqn_follow-me-tv-v0_w
 
 @app.route('/action', methods=['POST'])
 def get_action():
-    img = np.fromstring(request.data, np.uint8)
+    img = np.fromstring(request.data, np.uint8).reshape(stream_config.INPUT_HEIGHT, stream_config.INPUT_WIDTH, 3)
     faces = detector.get_faces(img)
     if faces:
         centroid = detector.get_centroid(faces)

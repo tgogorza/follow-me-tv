@@ -1,5 +1,10 @@
 import os
 import numpy as np
+try:
+    from picamera import PiCamera
+    from picamera.array import PiRGBArray
+except:
+    print('Not running on RaspberryPi')
 
 class FakeCamera:
     "FakeCamera used for RL agent training. Just returns a centroid on a virtual slot and moves the centroid with right/left rotations"
@@ -25,15 +30,11 @@ class FakeCamera:
 
 
 class PiCam:
-    def __init__(self, width=640, height=480):
-        try:
-            from picamera import PiCamera
-            from picamera.array import PiRGBArray
-        except:
-            print('Not running on RaspberryPi')
+    def __init__(self, width=640, height=480, flip=True):
         self.camera = PiCamera()
         self.camera.resolution = (width, height)
         self.camera.framerate = 24
+        self.camera.vflip = flip
         
     def get_image(self):
         frame = PiRGBArray(self.camera)
