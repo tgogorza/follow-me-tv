@@ -4,10 +4,12 @@ from gym.envs.registration import registry, register, make, spec
 from envs.tv_env import TVEnv
 
 from agent import FollowAgent
-from camera import PiCamera
+from detector import FaceDetector
 from stream import config as stream_config
 from envs import config as env_config
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+# import cv2
+# from PIL import Image
 
 ENV_NAME = 'tv_env-v0'
 
@@ -28,26 +30,30 @@ env.seed(3210)
 
 slot_width = stream_config.INPUT_WIDTH / env_config.num_slots 
 
-cam = PiCamera(stream_config.VIDEO_STREAM, stream_config.INPUT_WIDTH)
-
+# cam = PiCamera(stream_config.VIDEO_STREAM, stream_config.INPUT_WIDTH)
+detector = FaceDetector()
 agent = FollowAgent(env) 
 agent.start_service("/home/tomas/Projects/follow-me-tv/src/dqn_follow-me-tv-v0_weights_100000.h5f")
 
-@app.route('/action', methods=['GET'])
+@app.route('/action', methods=['POST'])
 def get_action():
-    img = cam.get_image()
-    faces = cam.get_faces(img)
+    img = np.fromstring(request.data, np.uint8)
+    faces = detector.get_faces(img)
     if faces:
-        centroid = cam.get_centroid(faces)
+        centroid = detector.get_centroid(faces)
         slot = int(centroid / slot_width)
         action = agent.get_action(slot)
         print("Next Action: {}".format(action))
+
+        # [cv2.rectangle(img,(box[0], box[1]),(box[2], box[3]),(0,255,0),2) for box in faces]
+        # cv2.line(img, (int(centroid), 0), (int(centroid), stream_config.INPUT_HEIGHT), (0,0,200), 2)
     else:
         action = 0
         centroid = 0
         slot = 0
 
-    
+    # im = Image.fromarray(img).show()
+
     response = {"action": str(action),
                 "action_str": agent.action_str[action],
                 "faces": faces,

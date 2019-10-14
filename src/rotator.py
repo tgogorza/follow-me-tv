@@ -24,7 +24,7 @@ class Rotator:
 			GPIO.output(self.pin, True)
 			self.angle = angle
 			self.pwm.ChangeDutyCycle(duty)
-			# sleep(0.5)
+			sleep(0.5)
 			GPIO.output(self.pin, False)
 			self.pwm.ChangeDutyCycle(0)
 		else:

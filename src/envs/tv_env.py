@@ -84,7 +84,7 @@ class TVEnv(gym.Env):
         assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
 
         self.execute_action(action)
-        _, new_centroid_slot = self.camera.get_centroid()
+        new_centroid_slot = self.camera.get_centroid()
 
         if new_centroid_slot == self.center_slot:
             self.steps_at_center += 1
@@ -103,7 +103,7 @@ class TVEnv(gym.Env):
 
     def reset(self):
         self.camera = FakeCamera(self.num_slots)
-        _, self.state = self.camera.get_centroid()
+        self.state = self.camera.get_centroid()
         self.steps = 0
         self.steps_at_center = 0
         # self.angle = 90
@@ -133,24 +133,6 @@ class TVEnv(gym.Env):
         elif action == 2:
             self.camera.rotate("right")
             # self.rotator.setAngle(self.rotator.getAngle() - self.rotation_step)
-
-    # def get_faces(self):
-    #     faces = face_detector.get_faces()
-    #     # Get x,y coords of each face
-    #     face_centers = [get_center(face) for face in faces]
-    #     # We only care about the horizontal center
-    #     face_centers_x = [x for x,_ in face_centers]
-    #     # centroid = #face group centroid
-    #     return centroid
-        
-    # def get_centroid(self, boxes):
-    #     # Get the horizontal center for each bounding box
-    #     centers = [box[0] + ((box[2] - box[0]) / 2) for box in boxes]
-    #     centroid = np.mean(centers)
-    #     return centroid
-
-    # def get_slot(self, x):
-    #     return int(x / self.slot_width)
 
     def get_reward(self, slot):
         '''

@@ -8,13 +8,14 @@ import time
 import cv2
 import os
 from time import sleep
+import numpy as np
 
 VIDEO_STREAM = 'http://192.168.0.30:8000/stream.mjpg'
-FLIP_VIDEO = False
+# FLIP_VIDEO = False
 PROCESS_HEIGHT = 480
 PROCESS_WIDTH = 640
-INPUT_HEIGHT = 960
-INPUT_WIDTH = 1280
+INPUT_HEIGHT = 480
+INPUT_WIDTH = 640
 
 curr_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,8 +40,8 @@ def convert_coords(box):
 # loop over stream
 while True:
 	ret, frame = vs.read()
-	if FLIP_VIDEO:
-		frame = cv2.flip(frame, 0)
+	# if FLIP_VIDEO:
+	# 	frame = cv2.flip(frame, 0)
 
 	# convert to grayscale and resize for face detections
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -57,14 +58,17 @@ while True:
 	# Draw bounding boxes
 	[cv2.rectangle(frame,(box[0], box[1]),(box[2], box[3]),(0,255,0),2) for box in boxes]
 	
-	# compute the facial embeddings for each face bounding box
-	# encodings = face_recognition.face_encodings(rgb, boxes)
-	
+	# Get the horizontal center for each bounding box
+	centers = [box[0] + ((box[2] - box[0]) / 2) for box in boxes]
+	if centers:
+		centroid = np.mean(centers)
+		cv2.line(frame, (int(centroid), 0), (int(centroid), INPUT_HEIGHT), (0,0,200), 2)
+
 	# Show frame
 	cv2.imshow('Stream IP Camera OpenCV',frame)
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
-	#sleep(1)
+	# sleep(1)
 
 vs.release()
 cv2.destroyAllWindows()
